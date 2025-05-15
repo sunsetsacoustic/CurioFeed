@@ -2,7 +2,7 @@ import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import path from 'path';
 
-const dbPath = path.join(process.cwd(), 'backend', 'data', 'news.db');
+const dbPath = path.join('backend', 'data', 'news.db');
 console.log('Resolved SQLite DB path:', dbPath);
 
 const dbPromise = open({
