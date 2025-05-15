@@ -1,8 +1,11 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import path from 'path';
+
+const dbPath = path.join(process.cwd(), 'backend', 'data', 'news.db');
 
 const dbPromise = open({
-  filename: './backend/data/news.db',
+  filename: dbPath,
   driver: sqlite3.Database
 });
 
