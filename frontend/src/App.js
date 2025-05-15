@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const categories = [
   'Technology',
@@ -20,6 +20,32 @@ const sources = [
 function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSource, setSelectedSource] = useState('All');
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchNews() {
+      setLoading(true);
+      setError(null);
+      let url = 'http://localhost:4000/api/news';
+      const params = [];
+      if (selectedCategory !== 'All') params.push(`category=${encodeURIComponent(selectedCategory)}`);
+      if (selectedSource !== 'All') params.push(`source=${encodeURIComponent(selectedSource)}`);
+      if (params.length) url += '?' + params.join('&');
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to fetch news');
+        const data = await res.json();
+        setArticles(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNews();
+  }, [selectedCategory, selectedSource]);
 
   return (
     <div className="App">
@@ -52,9 +78,21 @@ function App() {
         </div>
       </nav>
       <main className="main-content">
-        {/* News feed will go here */}
-        <h2>Welcome to CurioFeed</h2>
-        <p>Select a category or source to filter news.</p>
+        {loading && <p>Loading news...</p>}
+        {error && <p style={{color: 'red'}}>Error: {error}</p>}
+        {!loading && !error && articles.length === 0 && <p>No articles found.</p>}
+        <ul className="news-list">
+          {articles.map(article => (
+            <li key={article.link} className="news-item">
+              <a href={article.link} target="_blank" rel="noopener noreferrer" className="news-title">{article.title}</a>
+              <div className="news-meta">
+                <span className="news-source">{article.source}</span>
+                <span className="news-date">{article.pubDate ? new Date(article.pubDate).toLocaleString() : ''}</span>
+              </div>
+              {article.snippet && <p className="news-snippet">{article.snippet}</p>}
+            </li>
+          ))}
+        </ul>
       </main>
     </div>
   );
