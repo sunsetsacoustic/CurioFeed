@@ -17,18 +17,26 @@ const sources = [
   'Hacker News'
 ];
 
+const TABS = [
+  { label: 'RSS Feed', value: 'rss' },
+  { label: 'NewsAPI', value: 'newsapi' }
+];
+
 function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSource, setSelectedSource] = useState('All');
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedTab, setSelectedTab] = useState('rss');
 
   useEffect(() => {
     async function fetchNews() {
       setLoading(true);
       setError(null);
-      let url = 'http://localhost:4000/api/news';
+      let url = selectedTab === 'newsapi'
+        ? 'http://localhost:4000/api/newsapi'
+        : 'http://localhost:4000/api/news';
       const params = [];
       if (selectedCategory !== 'All') params.push(`category=${encodeURIComponent(selectedCategory)}`);
       if (selectedSource !== 'All') params.push(`source=${encodeURIComponent(selectedSource)}`);
@@ -45,10 +53,21 @@ function App() {
       }
     }
     fetchNews();
-  }, [selectedCategory, selectedSource]);
+  }, [selectedCategory, selectedSource, selectedTab]);
 
   return (
     <div className="App">
+      <div className="tabs">
+        {TABS.map(tab => (
+          <button
+            key={tab.value}
+            className={`tab-btn${selectedTab === tab.value ? ' active' : ''}`}
+            onClick={() => setSelectedTab(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
       <nav className="navbar">
         <div className="nav-section">
           <span className="nav-label">Categories:</span>
